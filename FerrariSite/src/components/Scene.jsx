@@ -1,5 +1,6 @@
 import { Suspense, useRef } from 'react'
 import { Canvas, useFrame } from '@react-three/fiber'
+import * as THREE from 'three'
 import { ScrollControls, Scroll, useScroll } from '@react-three/drei'
 import { CarFleet } from './CarFleet'
 import { CinematicCamera } from './CinematicCamera'
@@ -8,6 +9,7 @@ import { ShowroomGround } from './ShowroomGround'
 import { CinematicEffects } from './CinematicEffects'
 import { SceneLoader } from './SceneLoader'
 import { HeroEntrance } from './HeroEntrance'
+import useQualityTier from '../hooks/useQualityTier'
 
 function HtmlOverlay() {
   const scroll = useScroll()
@@ -26,15 +28,17 @@ function HtmlOverlay() {
     }
 
     if (text2.current) {
-      const p2 = Math.max(0, 1 - Math.abs(scrollVal - 0.5) * 4)
+      const center2 = 0.495
+      const p2 = Math.max(0, 1 - Math.abs(scrollVal - center2) * 4)
       text2.current.style.opacity = String(p2)
-      text2.current.style.transform = `translate3d(0, ${(0.5 - scrollVal) * 50}px, 0)`
+      text2.current.style.transform = `translate3d(0, ${(center2 - scrollVal) * 50}px, 0)`
     }
 
     if (text3.current) {
-      const p3 = Math.max(0, 1 - (1 - scrollVal) * 4)
+      const center3 = 0.815
+      const p3 = Math.max(0, 1 - Math.abs(scrollVal - center3) * 4)
       text3.current.style.opacity = String(p3)
-      text3.current.style.transform = `translate3d(0, ${(1 - scrollVal) * -50}px, 0)`
+      text3.current.style.transform = `translate3d(0, ${(center3 - scrollVal) * 50}px, 0)`
     }
   })
 
@@ -85,6 +89,8 @@ function HtmlOverlay() {
 }
 
 export function Scene() {
+  const quality = useQualityTier()
+  const debug = typeof window !== 'undefined' && new URLSearchParams(window.location.search).get('debug') === '1'
   return (
     <div id="canvas-container">
       <div className="film-grain" aria-hidden="true" />
@@ -93,15 +99,26 @@ export function Scene() {
 
       <Canvas
         shadows
-        dpr={[1, 1.5]}
+        dpr={quality.settings.dpr}
         gl={{
-          antialias: true,
+          antialias: quality.settings.multisampling > 0,
           powerPreference: 'high-performance',
           stencil: false,
+          physicallyCorrectLights: true,
+          outputEncoding: THREE.sRGBEncoding,
+          toneMapping: THREE.ACESFilmicToneMapping,
         }}
         camera={{ position: [6, 1.8, 9], fov: 38, near: 0.1, far: 80 }}
       >
         <CinematicLighting />
+
+        {debug ? (
+          // Debug helper: small emissive sphere at origin to validate camera & lighting
+          <mesh position={[0, 0.5, 0]}>
+            <sphereGeometry args={[0.25, 16, 16]} />
+            <meshStandardMaterial emissive={'#ffffff'} emissiveIntensity={1.2} color={'#222222'} />
+          </mesh>
+        ) : null}
         <ShowroomGround />
 
         <ScrollControls pages={3} damping={0.22}>
@@ -112,7 +129,7 @@ export function Scene() {
           <HtmlOverlay />
         </ScrollControls>
 
-        <CinematicEffects />
+        {quality.settings.composer ? <CinematicEffects /> : null}
       </Canvas>
     </div>
   )

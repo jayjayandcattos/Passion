@@ -35,6 +35,19 @@ body {
   z-index: 1;
 }
 
+#canvas-container::after {
+  content: '';
+  position: fixed;
+  inset: 0;
+  z-index: 2;
+  pointer-events: none;
+  background: radial-gradient(
+    ellipse 85% 75% at 50% 45%,
+    transparent 35%,
+    rgba(0, 0, 0, 0.45) 100%
+  );
+}
+
 #canvas-container canvas {
   display: block;
 }
@@ -70,7 +83,7 @@ body {
 
 .content-layer {
   position: relative;
-  z-index: 2;
+  z-index: 5;
   pointer-events: none;
 }
 
