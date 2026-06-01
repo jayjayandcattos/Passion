@@ -1,14 +1,13 @@
-@import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;800&family=Outfit:wght@300;400;600&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Inter:wght@400;500;600&display=swap');
 
 :root {
-  --color-bg: #070505;
-  --color-primary: #FF2800;
-  --color-text: #FFFFFF;
-  --color-text-muted: rgba(255, 255, 255, 0.6);
-  --font-heading: 'Cinzel', serif;
-  --font-body: 'Outfit', sans-serif;
-  --glass-bg: rgba(20, 17, 17, 0.2);
-  --glass-border: rgba(255, 255, 255, 0.05);
+  --color-bg: #050404;
+  --color-primary: #ff2800;
+  --color-accent: #ffb380;
+  --color-text: #f5f0eb;
+  --color-text-muted: rgba(245, 240, 235, 0.55);
+  --font-display: 'Bebas Neue', sans-serif;
+  --font-body: 'Inter', system-ui, sans-serif;
 }
 
 * {
@@ -21,27 +20,52 @@ body {
   background-color: var(--color-bg);
   color: var(--color-text);
   font-family: var(--font-body);
-  overflow-x: hidden;
+  overflow: hidden;
   -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
 }
 
-h1, h2, h3, h4, h5, h6 {
-  font-family: var(--font-heading);
-  font-weight: 600;
-  line-height: 1;
-  text-transform: uppercase;
-  letter-spacing: 0.1em;
+#root {
+  width: 100vw;
+  height: 100vh;
 }
 
 #canvas-container {
   position: fixed;
-  top: 0;
-  left: 0;
-  width: 100vw;
-  height: 100vh;
+  inset: 0;
   z-index: 1;
+}
+
+#canvas-container canvas {
+  display: block;
+}
+
+.film-grain {
+  position: fixed;
+  inset: 0;
+  z-index: 3;
   pointer-events: none;
+  opacity: 0.04;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+}
+
+.letterbox {
+  position: fixed;
+  left: 0;
+  right: 0;
+  height: 5vh;
+  z-index: 4;
+  pointer-events: none;
+  background: linear-gradient(to bottom, #000, transparent);
+}
+
+.letterbox--bottom {
+  top: auto;
+  bottom: 0;
+  background: linear-gradient(to top, #000, transparent);
+}
+
+.letterbox--top {
+  top: 0;
 }
 
 .content-layer {
@@ -54,9 +78,13 @@ h1, h2, h3, h4, h5, h6 {
   min-height: 100vh;
   display: flex;
   flex-direction: column;
-  justify-content: center;
-  padding: 0 10vw;
+  justify-content: flex-end;
+  padding: 0 clamp(1.5rem, 6vw, 6rem) 12vh;
   position: relative;
+}
+
+.section-hero {
+  justify-content: flex-end;
 }
 
 .section-right {
@@ -64,54 +92,143 @@ h1, h2, h3, h4, h5, h6 {
   text-align: right;
 }
 
-.section-center {
+.section-left {
+  align-items: flex-start;
+}
+
+.hud-block {
+  max-width: min(520px, 90vw);
+  pointer-events: auto;
+}
+
+.hud-block--hero .hud-tag,
+.hud-block--hero .hud-title,
+.hud-block--hero .hud-copy {
+  opacity: 0;
+  transform: translate3d(0, 40px, 0);
+}
+
+.hud-tag {
+  display: block;
+  font-family: var(--font-body);
+  font-size: 0.7rem;
+  font-weight: 600;
+  letter-spacing: 0.45em;
+  color: var(--color-primary);
+  margin-bottom: 0.5rem;
+}
+
+.hud-title {
+  font-family: var(--font-display);
+  font-size: clamp(4rem, 14vw, 9rem);
+  line-height: 0.88;
+  letter-spacing: 0.02em;
+  color: var(--color-text);
+  text-shadow:
+    0 0 80px rgba(255, 40, 0, 0.35),
+    0 4px 24px rgba(0, 0, 0, 0.9);
+  margin-bottom: 0.75rem;
+}
+
+.hud-copy {
+  font-size: clamp(0.95rem, 1.8vw, 1.1rem);
+  line-height: 1.6;
+  color: var(--color-text-muted);
+  max-width: 36ch;
+}
+
+.section-right .hud-copy {
+  margin-left: auto;
+}
+
+.scroll-hint {
+  position: absolute;
+  bottom: 4vh;
+  left: 50%;
+  transform: translateX(-50%);
+  font-size: 0.65rem;
+  letter-spacing: 0.5em;
+  color: var(--color-text-muted);
+  animation: pulse-hint 2s ease-in-out infinite;
+}
+
+@keyframes pulse-hint {
+  0%,
+  100% {
+    opacity: 0.35;
+  }
+  50% {
+    opacity: 0.85;
+  }
+}
+
+.scene-loader {
+  display: flex;
+  flex-direction: column;
   align-items: center;
-  text-align: center;
+  gap: 0.75rem;
+  min-width: 200px;
+}
+
+.scene-loader__bar {
+  width: 100%;
+  height: 2px;
+  background: rgba(255, 255, 255, 0.1);
+  overflow: hidden;
+}
+
+.scene-loader__fill {
+  height: 100%;
+  background: var(--color-primary);
+  transition: width 0.15s ease-out;
+}
+
+.scene-loader__label {
+  font-family: var(--font-display);
+  font-size: 1.25rem;
+  letter-spacing: 0.2em;
+  color: var(--color-text-muted);
+}
+
+.hero-text .subtitle,
+.hero-text .title,
+.hero-text .description {
+  opacity: 0;
+  transform: translate3d(0, 40px, 0);
+}
+
+.hero-text .subtitle {
+  display: block;
+  font-family: var(--font-body);
+  font-size: 0.7rem;
+  font-weight: 600;
+  letter-spacing: 0.45em;
+  color: var(--color-primary);
+  margin-bottom: 0.5rem;
+}
+
+.hero-text .title {
+  font-family: var(--font-display);
+  font-size: clamp(4rem, 14vw, 9rem);
+  line-height: 0.88;
+  letter-spacing: 0.02em;
+  color: var(--color-text);
+  text-shadow:
+    0 0 80px rgba(255, 40, 0, 0.35),
+    0 4px 24px rgba(0, 0, 0, 0.9);
+  margin-bottom: 0.75rem;
+}
+
+.hero-text .description {
+  font-size: clamp(0.95rem, 1.8vw, 1.1rem);
+  line-height: 1.6;
+  color: var(--color-text-muted);
+  max-width: 36ch;
 }
 
 .text-content {
-  max-width: 700px;
-  pointer-events: auto;
-  background: var(--glass-bg);
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
-  border: 1px solid var(--glass-border);
-  padding: 3rem;
-  border-radius: 2px;
-  opacity: 0; /* Handled by GSAP */
-  transform: translateY(40px); /* Handled by GSAP */
-}
-
-.title {
-  font-size: clamp(3rem, 7vw, 7rem);
-  margin-bottom: 1.5rem;
-  color: var(--color-text);
-  text-shadow: 0 10px 30px rgba(0,0,0,0.8);
-  font-weight: 400;
-}
-
-.subtitle {
-  font-size: clamp(1rem, 1.5vw, 1.5rem);
-  color: var(--color-primary);
-  margin-bottom: 1rem;
-  letter-spacing: 0.3em;
-  font-weight: 600;
-}
-
-.description {
-  font-size: 1.25rem;
-  line-height: 1.8;
-  color: var(--color-text-muted);
-  font-weight: 300;
-  letter-spacing: 0.03em;
-}
-
-#cursor-canvas {
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100vw;
-  height: 100vh;
-  z-index: 9999;
-  pointer-events: none;
+  background: none;
+  border: none;
+  backdrop-filter: none;
+  padding: 0;
 }
